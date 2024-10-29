@@ -1,0 +1,13 @@
+---
+title: "About Myself"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+# This is a website about Puyuan
+<img src="pictures/my picture.jpg" style = "width: 30%">
+
+## This is me. I'm a human not a Minion.
+## To know more about me, please check out the navigation menu at the top of the page or feel free to email me!

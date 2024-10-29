@@ -1,0 +1,95 @@
+---
+title: "Plotly"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plotly)
+library(flexdashboard)
+library(p8105.datasets)
+```
+
+## Box Plot
+```{r}
+data("ny_noaa")
+ny_noaa <- ny_noaa |>
+  mutate(date = ymd(date),
+         year = year(date),
+         month = month(date, label = TRUE, abbr = F, locale = "en"),
+         prcp = as.numeric(prcp),
+         tmax = as.numeric(tmax),
+         tmin = as.numeric(tmin)
+         ) 
+
+nydata <- ny_noaa |>
+  filter(year >= 2000) |>
+  select(prcp, month, year) |>
+  drop_na(prcp) |>
+  group_by(year, month) |>
+  summarize(avg_prcp = mean(prcp, na.rm = F), .groups = "keep")
+
+box_plot <- plot_ly(nydata, 
+        x = ~month, 
+        y = ~avg_prcp, 
+        type = "box", 
+        color = ~month) %>%
+  layout(
+    title = "Box Plot of Precipitation by Month",
+    xaxis = list(title = "Month"),
+    yaxis = list(title = "Precipitation (tenths of mm)"),
+    showlegend = FALSE
+  )
+
+box_plot
+```
+
+## Scatter Plot
+```{r}
+nysnow_t <- ny_noaa |>
+  drop_na(tmin, snow) |>
+  filter(year %in% c(2000, 2001),
+         snow > 0) |>
+  select(snow, month, year, tmin)
+
+scatter_plot <- nysnow_t |>
+  plot_ly(x = ~tmin,
+          y = ~snow,
+          type = "scatter",
+          mode = "markers",
+          color = ~ month,
+          alpha = .5) |>
+  layout(
+    title = "Scatter Plot of Snowfall vs. Minimum Temperature",
+    xaxis = list(title = "Minimum Temperature (tenths of °C)"),
+    yaxis = list(title = "Snowfall (mm)")
+  )
+
+scatter_plot
+```
+
+## Histogram
+```{r}
+ny_snow <- ny_noaa |>
+  filter(year >= 2000,
+         snow >= 300)
+
+hist_plot <- ny_snow |>
+  count(month) |>
+  mutate(month = fct_reorder(month, n)) |>
+  plot_ly(x = ~month, y = ~n, color = ~month, type = "bar", colors = "viridis") |>
+  layout(
+    title = "Number of Days with Snow Depth > 300 mm in Winter Months",
+    xaxis = list(title = "Month"),
+    yaxis = list(title = "Number of Days"),
+    legend = list(title = list(text = "Month"))
+  )
+
+hist_plot
+```
+
+
